@@ -37,10 +37,4 @@ router.get('/reminders', requireLogin, (req, res) => {
     res.render('reminders');
 });
 
-router.get('/tracker', requireLogin, (req, res) => {
-    // This will be handled in activities route but keeping the render here if needed
-    // Actually, tracker logic is in index.js for now, will move to activity routes.
-    res.redirect('/activities'); 
-});
-
 module.exports = router;
