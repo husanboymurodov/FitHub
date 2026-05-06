@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
 const sessionOptions = {
-    secret: process.env.SESSION_SECRET || 'FitHubWIF2003Team07okayokayokay',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
 };
