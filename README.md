@@ -1,6 +1,24 @@
 # FitHub Fitness Tracker
 
-FitHub is a web application for logging fitness activities, tracking progress, and managing user profiles. Built with Node.js, Express, and MongoDB.
+FitHub is a comprehensive web application designed to help users log fitness activities, track nutritional intake, monitor progress through visual charts, and manage health-related reminders.
+
+## Features
+
+- **Activity Tracker**: Log workouts with details like duration, distance, and calories burned. Supports image uploads for workout proof.
+- **Nutrition Management**: Track daily calorie intake and search for healthy meal ideas using integrated APIs.
+- **Progress Visualizations**: Interactive charts to monitor weight trends and activity consistency over time.
+- **Smart Reminders**: Set and manage health reminders (Hydration, Exercise, Meals) with automatic status updates.
+- **Admin Dashboard**: System-wide statistics and user activity monitoring for administrators.
+- **User Profiles**: Customizable user profiles with personal health metrics.
+
+## Technologies Used
+
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Frontend**: EJS (Embedded JavaScript), Vanilla CSS, Bootstrap 5
+- **Authentication**: Passport.js with Local Strategy, Bcrypt for password hashing
+- **Visualization**: Chart.js
+- **File Uploads**: Multer (configured for local storage)
 
 ## Project Structure
 
