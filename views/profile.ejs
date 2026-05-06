@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>User Profile - FitHub</title>
+  <link href="/css/main.min.css" rel="stylesheet">
+  <link href="/css/app.css" rel="stylesheet">
+
+</head>
+
+<body
+  style="background-image: url('/images/header-bg.jpg'); min-height: 100vh;   background-size: cover; background-repeat: no-repeat; background-position: center;">
+
+  <div class="container mt-5">
+
+    <!-- Container background -->
+    <div class="bg-light p-5 container mt-5 rounded">
+
+      <!-- Logo -->
+      <div style="text-align: center;">
+        <a href="/dashboard">
+          <img src="/images/logo-long.png" alt="FitHub" style="max-height: 60px;" class="mb-4">
+        </a>
+      </div>
+
+      <form id="profile-update" action="/profile" method="POST">
+        <div class="mt-2 row">
+          <!-- Left: Account Info -->
+          <div class="col-md-6 pe-md-3">
+            <h2>Account Information</h2>
+
+            <!-- Name -->
+            <div class="mb-3">
+              <label for="name" class="form-label">Name</label>
+              <input type="text" class="form-control" id="name" name="name" value="<%= user ? user.name : '' %>" required>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="<%= user ? user.email : '' %>" required>
+            </div>
+          </div>
+
+          <!-- Right: Fitness Profile -->
+          <div class="col-md-6 ps-md-3">
+            <h2>Fitness Profile</h2>
+
+            <!-- Age -->
+            <div class="mb-3">
+              <label for="age" class="form-label">Age</label>
+              <input type="number" class="form-control" id="age" name="age" value="<%= user && user.age ? user.age : '' %>">
+            </div>
+
+            <!-- Weight -->
+            <div class="mb-3">
+              <label for="weight" class="form-label">Weight</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="weight" name="weight" value="<%= user && user.weight ? user.weight : '' %>">
+                <span class="input-group-text bg-light">kg</span>
+              </div>
+            </div>
+
+            <!-- Height -->
+            <div class="mb-3">
+              <label for="height" class="form-label">Height</label>
+              <div class="input-group">
+                <input type="number" class="form-control" id="height" name="height" value="<%= user && user.height ? user.height : '' %>">
+                <span class="input-group-text bg-light">cm</span>
+              </div>
+            </div>
+
+            <!-- Gender -->
+            <div class="mb-3">
+              <label for="gender" class="form-label">Gender</label>
+              <div class="d-flex">
+                <div class="form-check me-3">
+                  <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male" <%= user && user.gender === 'male' ? 'checked' : '' %>>
+                  <label class="form-check-label" for="genderMale">Male</label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female" <%= user && user.gender === 'female' ? 'checked' : '' %>>
+                  <label class="form-check-label" for="genderFemale">Female</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="text-end mt-3">
+              <button type="submit" class="btn btn-secondary fw-semibold">Update Profile</button>
+            </div>
+
+          </div>
+        </div>
+        <% if (typeof profileMessage !== 'undefined') { %>
+          <div class="alert alert-success mt-3" role="alert">
+            <%= profileMessage %>
+          </div>
+        <% } %>
+        <% if (typeof profileError !== 'undefined') { %>
+          <div class="alert alert-danger mt-3" role="alert">
+            <%= profileError %>
+          </div>
+        <% } %>
+      </form>
+
+      <!-- Change Password Form -->
+      <form id="change-password" action="/change-password" method="POST" class="mt-4">
+        <div class="container bg-info rounded p-3">
+          <h4>Change Password</h4>
+          <div class="mb-3">
+            <label for="currentPassword" class="form-label">Current Password</label>
+            <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+          </div>
+          <div class="mb-3">
+            <label for="newPassword" class="form-label">New Password</label>
+            <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+          </div>
+          <button type="submit" class="btn btn-secondary fw-semibold">Change Password</button>
+          <% if (typeof passwordMessage !== 'undefined') { %>
+            <div class="alert alert-success mt-3" role="alert">
+              <%= passwordMessage %>
+            </div>
+          <% } %>
+          <% if (typeof passwordError !== 'undefined') { %>
+            <div class="alert alert-danger mt-3" role="alert">
+              <%= passwordError %>
+            </div>
+          <% } %>
+        </div>
+      </form>
+
+      <div class="d-flex justify-content-end gap-3">
+
+        <div class="  mt-3 ">
+          <form action="/logout" method="POST">
+            <button class="btn btn-dark">Log Out</button>
+          </form>
+        </div>
+
+        <!-- Delete account button -->
+        <div class="  mt-3 ">
+          <form action="/delete-account" method="POST" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+            <button class="btn btn-danger">Delete Account</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Home page button -->
+    <div class="text-center mt-4 pb-4">
+      <a href="/" class="btn btn-primary rounded-pill px-4">Back to Home Page</a>
+    </div>
+
+  </div>
+
+</body>
+
+</html>
