@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Activity = require('../models/activity');
-
-const requireLogin = (req, res, next) => {
-    if (!req.session.user_id) {
-        return res.redirect('/login');
-    }
-    next();
-};
+const { requireLogin } = require('../middleware/auth');
 
 const activityTypeMap = {
     1: "Running",

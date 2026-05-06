@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
-
-const requireLogin = (req, res, next) => {
-    if (!req.session.user_id) {
-        return res.redirect('/login');
-    }
-    next();
-};
+const { requireLogin } = require('../middleware/auth');
 
 router.get('/login', (req, res) => {
     res.render('login');
@@ -42,28 +36,6 @@ router.post('/login', async (req, res) => {
         res.redirect('/tracker');
     } else {
         res.render('login', { error: 'Invalid email or password.' });
-    }
-});
-
-router.post('/login-guest', async (req, res) => {
-    try {
-        const guestUser = await User.findOne({ email: 'guest@fithub.app' });
-        if (guestUser) {
-            req.session.user_id = guestUser._id;
-            res.redirect('/tracker');
-        } else {
-            // Create guest user if it doesn't exist
-            const newGuest = new User({
-                name: 'Guest User',
-                email: 'guest@fithub.app',
-                password: 'guestpassword123'
-            });
-            await newGuest.save();
-            req.session.user_id = newGuest._id;
-            res.redirect('/tracker');
-        }
-    } catch (error) {
-        res.render('login', { error: 'Error logging in as guest.' });
     }
 });
 

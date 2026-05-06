@@ -40,3 +40,26 @@ FitHub is a web application for logging fitness activities, tracking progress, a
    ```bash
    npm run server
    ```
+
+## Demo Credentials
+
+For portfolio review purposes, you can use the following pre-configured accounts to explore the application:
+
+### 1. Standard User (Demo)
+- **Email:** `guest@fithub.app`
+- **Password:** `guestpassword123`
+- **Access:** Full access to activity tracking, nutrition planning, and reminders.
+
+### 2. Administrator
+- **Email:** `admin@fithub.app`
+- **Password:** `adminpassword123`
+- **Access:** Includes access to the **Admin Dashboard** (available in the navbar) to view system-wide stats and user management.
+
+## Security & Architecture
+
+This project demonstrates several professional security practices:
+- **RBAC (Role-Based Access Control):** Server-side middleware enforces strict access limits based on user roles (User vs. Admin).
+- **Password Hashing:** Uses `bcrypt` with a salt factor of 12 for secure credential storage.
+- **Session Security:** Cryptographically signed session cookies with unique secrets.
+- **API Protection:** All data-driven endpoints are protected by authorization guards to prevent unauthorized access.
+- **Separation of Concerns:** Clean architectural split between Routes, Models, and Middleware.
