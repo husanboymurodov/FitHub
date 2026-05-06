@@ -39,9 +39,31 @@ router.post('/login', async (req, res) => {
     const foundUser = await User.findAndValidate(email, password);
     if (foundUser) {
         req.session.user_id = foundUser._id;
-        res.redirect('/dashboard');
+        res.redirect('/tracker');
     } else {
         res.render('login', { error: 'Invalid email or password.' });
+    }
+});
+
+router.post('/login-guest', async (req, res) => {
+    try {
+        const guestUser = await User.findOne({ email: 'guest@fithub.app' });
+        if (guestUser) {
+            req.session.user_id = guestUser._id;
+            res.redirect('/tracker');
+        } else {
+            // Create guest user if it doesn't exist
+            const newGuest = new User({
+                name: 'Guest User',
+                email: 'guest@fithub.app',
+                password: 'guestpassword123'
+            });
+            await newGuest.save();
+            req.session.user_id = newGuest._id;
+            res.redirect('/tracker');
+        }
+    } catch (error) {
+        res.render('login', { error: 'Error logging in as guest.' });
     }
 });
 
