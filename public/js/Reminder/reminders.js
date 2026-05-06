@@ -147,13 +147,3 @@ setInterval(() => {
         }
     });
 }, 10000);  // Check every 10 seconds
-
-// Voice input
-const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-recognition.onresult = function (event) {
-    const transcript = event.results[0][0].transcript;
-    document.getElementById('reminder-text').value = transcript;
-};
-document.getElementById('voice-input').addEventListener('click', () => {
-    recognition.start();
-});

@@ -37,7 +37,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
 const sessionOptions = {
-    secret: process.env.SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || 'fithub_fallback_secret_for_development',
     resave: false,
     saveUninitialized: false
 };
@@ -49,5 +49,20 @@ app.use('/', userRoutes);
 app.use('/tracker', activityRoutes);
 app.use('/api', apiRoutes);
 app.use('/admin', adminRoutes);
+
+// Global Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    
+    // If it's an API request, return JSON
+    if (req.xhr || req.path.startsWith('/api')) {
+        return res.status(err.status || 500).json({
+            error: err.message || 'Internal Server Error'
+        });
+    }
+    
+    // Otherwise render a generic error page (or just text for now)
+    res.status(err.status || 500).send('Something broke! Please try again later.');
+});
 
 module.exports = app;

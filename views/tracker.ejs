@@ -52,6 +52,7 @@
         </div>
 
         <div class="container">
+
             <div class="row">
                 <!-- Left Column: 8/12 -->
                 <div class="col-lg-8 pe-lg-3">
@@ -327,8 +328,6 @@
 
                 </div>
 
-
-
                 <!-- Right Column: 4/12 -->
                 <div class="col-lg-4 bg-light rounded-3">
                     <div class="mt-4">
@@ -349,13 +348,13 @@
                                                     <div class="flex-grow-1 pe-2 activity-item text-primary"
                                                         data-id="<%= activity._id %>" data-title="<%= activity.title %>"
                                                         data-datetime="<%= new Date(activity.datetime).toLocaleString() %>"
-                                                        data-duration="<%= activity.duration.hours %>h <%= activity.duration.minutes %>m <%= activity.duration.seconds %>s"
+                                                        data-duration="<%= activity.duration && activity.duration.hours != null ? activity.duration.hours + 'h ' + activity.duration.minutes + 'm ' + activity.duration.seconds + 's' : '' %>"
                                                         data-distance="<%= typeof activity.distance === 'number' && activity.distance > 0 ? activity.distance + ' km' : '' %>"
                                                         data-rate="<%= activity.rate %>"
                                                         data-notes="<%= activity.notes %>"
                                                         data-activity-type="<%= activity.activityTypeLabel %>"
                                                         data-speed="<%= activity.speed %>"
-                                                        data-weight-used="<%= activity.weightUsed ? activity.weightUsed.weight + ' ' + activity.weightUsed.unit : '' %>"
+                                                        data-weight-used="<%= activity.weightUsed && activity.weightUsed.weight ? activity.weightUsed.weight + ' ' + activity.weightUsed.unit : '' %>"
                                                         data-steps="<%= activity.steps %>"
                                                         data-sets="<%= activity.sets %>"
                                                         data-reps="<%= activity.reps && activity.reps.length ? activity.reps.join(', ') : '' %>"
@@ -374,7 +373,8 @@
                                                     <!-- Delete button: minimal width -->
                                                     <form action="/tracker/<%= activity._id %>?_method=DELETE"
                                                         method="POST"
-                                                        onsubmit="return confirm('Are you sure you want to delete this activity?');">                                                        <button type="submit" class="btn btn-sm text-danger p-1"
+                                                        onsubmit="return confirm('Are you sure you want to delete this activity?');">
+                                                        <button type="submit" class="btn btn-sm text-danger p-1"
                                                             style="border: none; background: none;"
                                                             title="Delete this activity">
                                                             <i class="bi bi-trash3"></i>
@@ -384,11 +384,8 @@
                                             </li>
                                             <% }) %>
                                     </ul>
-
-
                                     <% } %>
                         </div>
-
                     </div>
                 </div>
 
