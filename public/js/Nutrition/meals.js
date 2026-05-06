@@ -1,4 +1,4 @@
-let favoriteMeals = JSON.parse(localStorage.getItem('favoriteMeals')) || [];
+let favoriteMeals = [];
 let mealData = []; // This will store the fetched meal data
 
 // Fetch meal data from TheMealDB API
@@ -104,14 +104,29 @@ function showMealDetails(index) {
 
 
 // Function to add meal to favorites
-function addFavorite(mealId) {
-    if (!favoriteMeals.includes(mealId)) {
-        favoriteMeals.push(mealId);
-        localStorage.setItem('favoriteMeals', JSON.stringify(favoriteMeals));
-        // alert("Meal added to favorites!");
-        renderFavoriteMeals();
-    } else {
+async function addFavorite(index) {
+    const meal = mealData[index];
+    if (favoriteMeals.some(f => f.mealId === meal.idMeal)) {
         alert("Meal is already in favorites.");
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/favorites', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                mealId: meal.idMeal,
+                name: meal.strMeal,
+                image: meal.strMealThumb,
+                category: meal.strCategory
+            })
+        });
+        const savedFav = await response.json();
+        favoriteMeals.push(savedFav);
+        renderFavoriteMeals();
+    } catch (error) {
+        console.error('Error saving favorite:', error);
     }
 }
 
@@ -134,21 +149,20 @@ function renderFavoriteMeals() {
     const favList = document.getElementById("favoriteMealsList");
     favList.innerHTML = ''; // Clear previous
 
-    const favorites = favoriteMeals.map(id => mealData[id]).filter(Boolean);
-    if (favorites.length === 0) {
+    if (favoriteMeals.length === 0) {
         favList.innerHTML = '<p class="text-primary px-3">You have no favorite meals yet.</p>';
         return;
     }
 
-    favorites.forEach((meal, index) => {
+    favoriteMeals.forEach((meal) => {
         const favCard = `
         <div class="col-md-4">
           <div class="card mb-4">
-            <img src="${meal.strMealThumb}" class="card-img-top" alt="${meal.strMeal}">
+            <img src="${meal.image}" class="card-img-top" alt="${meal.name}">
             <div class="card-body">
-              <h5 class="card-title">${meal.strMeal}</h5>
-              <p class="card-text">${meal.strCategory}</p>
-              <button class="btn btn-danger" onclick="removeFavorite(${favoriteMeals[index]})">Remove from Favorites</button>
+              <h5 class="card-title">${meal.name}</h5>
+              <p class="card-text">${meal.category}</p>
+              <button class="btn btn-danger" onclick="removeFavorite('${meal.mealId}')">Remove from Favorites</button>
             </div>
           </div>
         </div>
@@ -159,132 +173,109 @@ function renderFavoriteMeals() {
 
 }
 
-function addMealToIntake(index) {
+async function addMealToIntake(index) {
     const meal = mealData[index];
     const name = meal.strMeal;
     const cal = calorieMap[name] || 0;
 
-    // Skip if calories not found
     if (!cal) {
         alert("No calorie data available for this meal.");
         return;
     }
 
-    const item = {
-        name,
-        calories: cal
-    };
-
-    dailyIntakeItems.push(item);
-
-    const li = document.createElement('li');
-    li.className = 'list-group-item d-flex justify-content-between align-items-center';
-    li.textContent = `${name} - ${cal} kcal`;
-
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'btn btn-danger btn-sm';
-    removeBtn.textContent = 'Remove';
-    removeBtn.onclick = function () {
-        removeIntake(item);
-    };
-
-    li.appendChild(removeBtn);
-    document.getElementById('intakeList').appendChild(li);
-
-    totalCalories += cal;
-    document.getElementById('totalCalories').textContent = totalCalories;
+    try {
+        const response = await fetch('/api/intake', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, calories: cal })
+        });
+        const intake = await response.json();
+        renderIntakeList(intake);
+    } catch (error) {
+        console.error('Error adding intake:', error);
+    }
 }
 
 
 // Remove favorite meals
-function removeFavorite(mealId) {
-    favoriteMeals = favoriteMeals.filter(id => id !== mealId);
-    localStorage.setItem('favoriteMeals', JSON.stringify(favoriteMeals));
-    renderFavoriteMeals(); // Update the list
+async function removeFavorite(mealId) {
+    try {
+        await fetch(`/api/favorites/${mealId}`, { method: 'DELETE' });
+        favoriteMeals = favoriteMeals.filter(f => f.mealId !== mealId);
+        renderFavoriteMeals();
+    } catch (error) {
+        console.error('Error removing favorite:', error);
+    }
 }
 
 
 
 // Daily Intake Tracker
-let totalCalories = 0;
-let dailyIntakeItems = [];
-
-function addIntake() {
+async function addIntake() {
     const name = document.getElementById('foodName').value;
     const cal = parseInt(document.getElementById('foodCalories').value);
     if (!name || isNaN(cal)) return;
 
-    // Create a new item object
-    const item = {
-        name,
-        calories: cal,
-    };
-
-    // Add the item to the array
-    dailyIntakeItems.push(item);
-
-    const li = document.createElement('li');
-    li.className = 'list-group-item d-flex justify-content-between align-items-center';
-    li.textContent = `${name} - ${cal} kcal`;
-
-    // Create a "Remove" button
-    const removeBtn = document.createElement('button');
-    removeBtn.className = 'btn btn-danger btn-sm';
-    removeBtn.textContent = 'Remove';
-    removeBtn.onclick = function () {
-        removeIntake(item); // Remove the item from the array and update the list
-    };
-
-    // Append the remove button to the list item
-    li.appendChild(removeBtn);
-
-    document.getElementById('intakeList').appendChild(li);
-
-    totalCalories += cal;
-    document.getElementById('totalCalories').textContent = totalCalories;
-
-    document.getElementById('foodName').value = '';
-    document.getElementById('foodCalories').value = '';
+    try {
+        const response = await fetch('/api/intake', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, calories: cal })
+        });
+        const intake = await response.json();
+        renderIntakeList(intake);
+        document.getElementById('foodName').value = '';
+        document.getElementById('foodCalories').value = '';
+    } catch (error) {
+        console.error('Error adding intake:', error);
+    }
 }
 
-function removeIntake(item) {
-    // Remove the item from the array
-    dailyIntakeItems = dailyIntakeItems.filter(i => i !== item);
-
-    // Recalculate the total calories after removal
-    totalCalories = dailyIntakeItems.reduce((sum, currentItem) => sum + currentItem.calories, 0);
-    document.getElementById('totalCalories').textContent = totalCalories;
-
-    // Re-render the daily intake list
-    renderIntakeList();
+async function removeIntake(itemId) {
+    try {
+        const response = await fetch(`/api/intake/${itemId}`, { method: 'DELETE' });
+        const intake = await response.json();
+        renderIntakeList(intake);
+    } catch (error) {
+        console.error('Error removing intake:', error);
+    }
 }
 
-function renderIntakeList() {
+function renderIntakeList(intake) {
     const intakeList = document.getElementById('intakeList');
     intakeList.innerHTML = '';
+    document.getElementById('totalCalories').textContent = intake.totalCalories;
 
-    dailyIntakeItems.forEach(item => {
+    intake.items.forEach(item => {
         const li = document.createElement('li');
         li.className = 'list-group-item d-flex justify-content-between align-items-center';
         li.textContent = `${item.name} - ${item.calories} kcal`;
 
-        // Create a "Remove" button
         const removeBtn = document.createElement('button');
         removeBtn.className = 'btn btn-danger btn-sm';
         removeBtn.textContent = 'Remove';
         removeBtn.onclick = function () {
-            removeIntake(item);
+            removeIntake(item._id);
         };
 
         li.appendChild(removeBtn);
-
         intakeList.appendChild(li);
     });
 }
 
 
-// Initialize favourites on page load
+// Initialize favorites on page load
 window.onload = async function () {
-    await fetchMeals(); // Wait for meals to be fetched
-    renderFavoriteMeals(); // Now render favorites after meals are loaded
+    try {
+        await fetchMeals();
+        const favResponse = await fetch('/api/favorites');
+        favoriteMeals = await favResponse.json();
+        renderFavoriteMeals();
+        
+        const intakeResponse = await fetch('/api/intake');
+        const intake = await intakeResponse.json();
+        renderIntakeList(intake);
+    } catch (error) {
+        console.error('Error initializing nutrition page:', error);
+    }
 }

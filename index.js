@@ -11,6 +11,7 @@ const session = require('express-session');
 const pageRoutes = require('./routes/pages');
 const userRoutes = require('./routes/users');
 const activityRoutes = require('./routes/activities');
+const apiRoutes = require('./routes/api');
 
 // MongoDB connection
 const dbUrl = process.env.MONGODB_URI || 'mongodb://localhost:27017/fitHub';
@@ -38,6 +39,7 @@ app.use(session(sessionOptions));
 app.use('/', pageRoutes);
 app.use('/', userRoutes);
 app.use('/tracker', activityRoutes);
+app.use('/api', apiRoutes);
 
 app.listen(port, () => {
     console.log(`Server has started and App is listening on port ${port}`);

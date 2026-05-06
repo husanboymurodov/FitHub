@@ -72,6 +72,11 @@ router.post('/logout', (req, res) => {
     res.redirect('/');
 });
 
+router.get('/logout', (req, res) => {
+    req.session.user_id = null;
+    res.redirect('/');
+});
+
 router.get('/profile', requireLogin, async (req, res) => {
     const user = await User.findById(req.session.user_id);
     res.render('profile', { user });

@@ -34,6 +34,7 @@
           <li class="nav-item"><a class="nav-link" href="/nutrition">Nutrition</a></li>
           <li class="nav-item"><a class="nav-link" href="/reminders">Reminders</a></li>
           <li class="nav-item"><a class="nav-link fw-bold" href="/profile">Profile</a></li>
+          <li class="nav-item"><a class="nav-link" href="/logout">Logout</a></li>
         </ul>
       </div>
     </div>
@@ -46,7 +47,21 @@
         Welcome Back, <%= firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase() %>
       </div>
       <div class="masthead-heading text-uppercase">Where Goals Become Gains</div>
-      <a class="btn btn-secondary btn-xl text-uppercase" href="/tracker">Track Your Activity</a>
+      <div class="row justify-content-center mt-4">
+        <div class="col-md-3">
+          <div class="card bg-primary bg-opacity-75 text-white p-3 mb-3 border-0 rounded-4">
+            <h5 class="mb-0"><%= stats.count %></h5>
+            <small>Activities Today</small>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card bg-danger bg-opacity-75 text-white p-3 mb-3 border-0 rounded-4">
+            <h5 class="mb-0"><%= stats.calories %> kcal</h5>
+            <small>Burned Today</small>
+          </div>
+        </div>
+      </div>
+      <a class="btn btn-secondary btn-xl text-uppercase mt-3" href="/tracker">Track Your Activity</a>
     </div>
   </header>
   <!-- Features-->
@@ -124,7 +139,6 @@
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq"
     crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="/js/chartOverview.js"></script>
   <script src="/js/scripts.js"></script>
 
 

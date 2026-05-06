@@ -2,22 +2,26 @@ const form = document.getElementById('reminder-form');
 const list = document.getElementById('reminder-list');
 const sound = document.getElementById("reminder-sound");
 let reminders = [];
-window.addEventListener('load', () => {
-    const saved = localStorage.getItem('reminders');
-    if (saved) {
-        reminders = JSON.parse(saved);
+
+// Fetch reminders from server on load
+window.addEventListener('load', async () => {
+    try {
+        const response = await fetch('/api/reminders');
+        reminders = await response.json();
         reminders.forEach(createReminderItem);
+    } catch (error) {
+        console.error('Error fetching reminders:', error);
     }
 });
 
-form.addEventListener('submit', function (e) {
+form.addEventListener('submit', async function (e) {
     e.preventDefault();
 
     const text = document.getElementById('reminder-text').value;
     const time = document.getElementById('reminder-time').value;
     const category = document.getElementById('reminder-category').value;
 
-    let recurring = 'none'; // Default to 'none'
+    let recurring = 'none';
     const selectedDays = [];
 
     if (document.getElementById('daily').checked) {
@@ -32,43 +36,42 @@ form.addEventListener('submit', function (e) {
         if (document.getElementById('sunday').checked) selectedDays.push('Sunday');
 
         if (selectedDays.length > 0) {
-            recurring = selectedDays;  // Store selected days for weekly recurrence
+            recurring = selectedDays;
         }
     }
     const duration = document.getElementById('reminder-duration').value;
-    const durationMs = duration * 60 * 1000;
-    const endTime = new Date(time).getTime() + durationMs; // endTime in milliseconds
     const interval = document.getElementById('reminder-interval').value;
-    const reminderTime = new Date().getTime();
 
-    let nextReminderTime = reminderTime;
+    const reminderData = { text, time, category, recurring, duration, interval };
 
-    // If there is a repeat interval, calculate the next reminder time
-    if (interval !== "none") {
-        nextReminderTime = reminderTime + (parseInt(interval) * 60 * 1000); // Convert to milliseconds
+    try {
+        const response = await fetch('/api/reminders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reminderData)
+        });
+        const savedReminder = await response.json();
+        reminders.push(savedReminder);
+        createReminderItem(savedReminder);
+        form.reset();
+    } catch (error) {
+        console.error('Error saving reminder:', error);
     }
-    const reminder = { text, time, category, recurring, duration, interval, id: Date.now(), shown: false };
-
-    reminders.push(reminder);
-    saveReminders();
-    createReminderItem(reminder);
-    form.reset();
 });
 
 function createReminderItem(reminder) {
     const li = document.createElement('li');
     li.className = "list-group-item d-flex justify-content-between align-items-center";
 
-    // Format the reminder time
     const reminderTime = new Date(reminder.time);
     const formattedTime = reminderTime.toLocaleString('en-US', {
-        weekday: 'short', // e.g., "Mon"
+        weekday: 'short',
         year: 'numeric',
-        month: 'short', // e.g., "May"
+        month: 'short',
         day: 'numeric',
         hour: 'numeric',
         minute: 'numeric',
-        hour12: true, // 12-hour clock
+        hour12: true,
     });
 
     li.innerHTML = `
@@ -81,18 +84,17 @@ function createReminderItem(reminder) {
     <button class="btn btn-sm btn-danger delete-btn">×</button>
   `;
 
-    li.querySelector('.delete-btn').addEventListener('click', () => {
-        list.removeChild(li);
-        reminders = reminders.filter(r => r.id !== reminder.id);
-        saveReminders();
+    li.querySelector('.delete-btn').addEventListener('click', async () => {
+        try {
+            await fetch(`/api/reminders/${reminder._id}`, { method: 'DELETE' });
+            list.removeChild(li);
+            reminders = reminders.filter(r => r._id !== reminder._id);
+        } catch (error) {
+            console.error('Error deleting reminder:', error);
+        }
     });
 
     list.appendChild(li);
-}
-
-
-function saveReminders() {
-    localStorage.setItem('reminders', JSON.stringify(reminders));
 }
 
 // Notification logic

@@ -17,12 +17,34 @@ router.get('/', (req, res) => {
     }
 });
 
+const Activity = require('../models/activity');
+
 router.get('/dashboard', async (req, res) => {
     if (!req.session.user_id) {
         return res.redirect('/');
     }
-    const user = await User.findById(req.session.user_id);
-    res.render('dashboard', { user });
+    
+    try {
+        const user = await User.findById(req.session.user_id);
+        
+        // Fetch today's activities
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const activitiesToday = await Activity.find({
+            user: req.session.user_id,
+            datetime: { $gte: startOfToday }
+        });
+
+        const stats = {
+            count: activitiesToday.length,
+            calories: activitiesToday.reduce((sum, a) => sum + (a.caloriesBurned || 0), 0)
+        };
+
+        res.render('dashboard', { user, stats });
+    } catch (error) {
+        console.error('Dashboard error:', error);
+        res.redirect('/');
+    }
 });
 
 router.get('/progress', requireLogin, (req, res) => {
