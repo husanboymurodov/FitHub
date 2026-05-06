@@ -39,6 +39,44 @@ router.post('/login', async (req, res) => {
     }
 });
 
+router.post('/login-guest', async (req, res) => {
+    try {
+        let guestUser = await User.findOne({ email: 'guest@fithub.app' });
+        if (!guestUser) {
+            guestUser = new User({
+                name: 'Demo User',
+                email: 'guest@fithub.app',
+                password: 'guestpassword123',
+                isAdmin: false
+            });
+            await guestUser.save();
+        }
+        req.session.user_id = guestUser._id;
+        res.redirect('/tracker');
+    } catch (error) {
+        res.render('login', { error: 'Error logging in as guest.' });
+    }
+});
+
+router.post('/login-admin', async (req, res) => {
+    try {
+        let adminUser = await User.findOne({ email: 'admin@fithub.app' });
+        if (!adminUser) {
+            adminUser = new User({
+                name: 'Project Administrator',
+                email: 'admin@fithub.app',
+                password: 'adminpassword123',
+                isAdmin: true
+            });
+            await adminUser.save();
+        }
+        req.session.user_id = adminUser._id;
+        res.redirect('/tracker');
+    } catch (error) {
+        res.render('login', { error: 'Error logging in as admin.' });
+    }
+});
+
 router.post('/logout', (req, res) => {
     req.session.user_id = null;
     res.redirect('/');

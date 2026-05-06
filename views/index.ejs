@@ -43,7 +43,15 @@
     <div class="container">
       <div class="masthead-subheading">Welcome To The Hub</div>
       <div class="masthead-heading text-uppercase">Where Goals Become Gains</div>
-      <a class="btn btn-secondary btn-xl text-uppercase" href="/register">Let's Start</a>
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a class="btn btn-secondary btn-xl text-uppercase" href="/register">Let's Start</a>
+        <form action="/login-guest" method="POST">
+          <button type="submit" class="btn btn-outline-light btn-xl text-uppercase">Guest Mode</button>
+        </form>
+        <form action="/login-admin" method="POST">
+          <button type="submit" class="btn btn-outline-warning btn-xl text-uppercase">Admin Mode</button>
+        </form>
+      </div>
     </div>
   </header>
   <!-- Features-->

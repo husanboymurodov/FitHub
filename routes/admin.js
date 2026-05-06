@@ -6,7 +6,10 @@ const Activity = require('../models/activity');
 // Middleware to check if user is logged in AND is an admin
 const requireAdmin = async (req, res, next) => {
     if (!req.session.user_id) {
-        return res.status(401).json({ error: "Unauthorized. Please login." });
+        if (req.xhr || req.path.startsWith('/api') || req.path.startsWith('/stats') || req.path.startsWith('/users')) {
+            return res.status(401).json({ error: "Unauthorized. Please login." });
+        }
+        return res.redirect('/login');
     }
 
     try {
@@ -14,12 +17,42 @@ const requireAdmin = async (req, res, next) => {
         if (user && user.isAdmin) {
             next();
         } else {
-            res.status(403).json({ error: "Access denied. Admins only." });
+            if (req.xhr || req.path.startsWith('/api') || req.path.startsWith('/stats') || req.path.startsWith('/users')) {
+                return res.status(403).json({ error: "Access denied. Admins only." });
+            }
+            return res.redirect('/dashboard');
         }
     } catch (error) {
         res.status(500).json({ error: "Server error during admin check." });
     }
 };
+
+// --- Visual Admin Dashboard ---
+router.get('/', requireAdmin, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.user_id);
+        
+        const userCount = await User.countDocuments();
+        const activityCount = await Activity.countDocuments();
+        
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+        const recentUsers = await User.find({ createdAt: { $gte: sevenDaysAgo } }).countDocuments();
+
+        const allUsers = await User.find({}, '-password').sort({ createdAt: -1 });
+
+        const stats = {
+            totalUsers: userCount,
+            totalActivities: activityCount,
+            newUsersThisWeek: recentUsers
+        };
+
+        res.render('admin', { user, stats, usersList: allUsers });
+    } catch (error) {
+        console.error("Admin dashboard error:", error);
+        res.status(500).send("Server Error");
+    }
+});
 
 // --- Admin Dashboard Data ---
 router.get('/stats', requireAdmin, async (req, res) => {
