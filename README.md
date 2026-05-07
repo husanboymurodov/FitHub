@@ -36,7 +36,29 @@ FitHub is a comprehensive web application designed to help users log fitness act
 - `views/`: EJS templates for the UI.
 - `public/`: Static assets (CSS, JS, images).
 
-## Setup
+## Deployment (Google Cloud Run)
+
+The application is containerized and deployed to **Google Cloud Run**.
+
+### 1. Build and Push to Artifact Registry
+Use Google Cloud Build to ensure the image is built for the correct architecture (`amd64`):
+
+```bash
+gcloud builds submit --tag asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app
+```
+
+### 2. Deploy to Cloud Run
+Deploy the container and set the necessary environment variables:
+
+```bash
+gcloud run deploy fithub-service \
+  --image asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app \
+  --region asia-southeast1 \
+  --allow-unauthenticated \
+  --set-env-vars MONGODB_URI='your_mongodb_connection_string',PORT=8080
+```
+
+## Setup (Local Development)
 
 1. **Install dependencies**:
 

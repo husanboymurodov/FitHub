@@ -121,5 +121,8 @@ dist
 ehthumbs.db
 Thumbs.db
 
-#others
+# others
 cookies.txt
+.env
+.env.*
+!.env.example
