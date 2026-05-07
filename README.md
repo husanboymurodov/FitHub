@@ -38,14 +38,18 @@ FitHub is a comprehensive health and fitness management platform. It allows user
 ## Deployment (Google Cloud Run)
 
 The application is containerized and deployed via **Google Cloud Build** to ensure consistent architecture compliance.
+**CI/CD is configured such that pushes to the main branch automatically trigger a new build and deployment.**
 
 ### CI/CD Workflow
-1. **Containerization**: 
+1. **Source Control Integration**: Changes are pushed to the GitHub repository.
+2. **Automated Build**: Google Cloud Build detects new commits and builds the Docker image.
    ```bash
+   # Automatically triggered by Cloud Build
    gcloud builds submit --tag asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app
    ```
-2. **Orchestration**:
+3. **Automated Deployment**: The newly built image is deployed to Google Cloud Run.
    ```bash
+   # Automatically triggered by Cloud Build
    gcloud run deploy fithub-service \
      --image asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app \
      --region asia-southeast1 \
