@@ -44,17 +44,18 @@ The application is containerized and deployed via **Google Cloud Build** to ensu
 1. **Source Control Integration**: Changes are pushed to the GitHub repository.
 2. **Automated Build**: Google Cloud Build detects new commits and builds the Docker image.
    ```bash
-   # Automatically triggered by Cloud Build
-   gcloud builds submit --tag asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app
+   # Automatically triggered by Cloud Build using cloudbuild.yaml
+   # Image: asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:$COMMIT_SHA
    ```
 3. **Automated Deployment**: The newly built image is deployed to Google Cloud Run.
    ```bash
-   # Automatically triggered by Cloud Build
+   # Automatically triggered by Cloud Build using cloudbuild.yaml
+   # Note: MONGODB_URI and SESSION_SECRET are passed as Cloud Build substitutions.
    gcloud run deploy fithub-service \
-     --image asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app \
+     --image asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:$COMMIT_SHA \
      --region asia-southeast1 \
      --allow-unauthenticated \
-     --set-env-vars MONGODB_URI='[CONNECTION_STRING]',SESSION_SECRET='[SECRET]'
+     --set-env-vars MONGODB_URI='${_MONGODB_URI}',SESSION_SECRET='${_SESSION_SECRET}'
    ```
 
 ## Local Development
