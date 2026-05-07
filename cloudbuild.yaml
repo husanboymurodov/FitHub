@@ -1,0 +1,50 @@
+# cloudbuild.yaml
+steps:
+# Step 1: Build the Docker image
+# This step uses the 'docker' builder to create your container image.
+# It tags the image with the commit SHA for unique identification.
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:${COMMIT_SHA}', '.']
+
+# Step 2: Push the Docker image to Google Artifact Registry
+# This makes the built image available for deployment.
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:${COMMIT_SHA}']
+
+# Step 3: Deploy the image to Cloud Run
+# This step uses the 'gcloud' builder to deploy the image.
+# It sets the necessary environment variables for your application.
+# The '--allow-unauthenticated' flag makes the service publicly accessible.
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+  - 'run'
+  - 'deploy'
+  - 'fithub-app'
+  - '--image'
+  - 'asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:${COMMIT_SHA}'
+  - '--region'
+  - 'asia-southeast1'
+  - '--platform'
+  - 'managed'
+  - '--allow-unauthenticated'
+  - '--set-env-vars'
+  - 'MONGODB_URI=${_MONGODB_URI},SESSION_SECRET=${_SESSION_SECRET}' # These are defined as substitutions below
+
+# This section lists the images produced by the build, primarily for Artifact Registry tracking.
+images:
+- 'asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:${COMMIT_SHA}'
+
+# Options for the build process.
+options:
+  # This option is crucial to allow Cloud Build to access external networks
+  # (e.g., to connect to MongoDB Atlas during deployment validation or for npm install if not done in dockerfile).
+  # This allows the build to access the internet during deployment phase.
+  logging: CLOUD_LOGGING_ONLY
+  # This enables dynamic variable substitution, which is used for ${PROJECT_ID}, ${COMMIT_SHA}, etc.
+  dynamicSubstitutions: true
+
+# Substitutions for sensitive information or variables not directly available from Cloud Build.
+# These values will be set in the Cloud Build trigger settings.
+substitutions:
+  _MONGODB_URI: 'YOUR_MONGODB_ATLAS_CONNECTION_STRING' # Placeholder for your MongoDB URI
+  _SESSION_SECRET: 'YOUR_SESSION_SECRET'             # Placeholder for your session secret
