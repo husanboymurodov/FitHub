@@ -1,105 +1,93 @@
 # FitHub Fitness Tracker
 
-FitHub is a comprehensive web application designed to help users log fitness activities, track nutritional intake, monitor progress through visual charts, and manage health-related reminders.
+FitHub is a comprehensive health and fitness management platform. It allows users to log workouts, track nutritional metrics, visualize progress through interactive analytics, and manage wellness reminders.
 
-## Features
+**Live Demo:** [https://fithub-app-745483922277.asia-southeast1.run.app](https://fithub-app-745483922277.asia-southeast1.run.app)
 
-- **Activity Tracker**: Log workouts with details like duration, distance, and calories burned. Supports image uploads for workout proof.
-- **Nutrition Management**: Track daily calorie intake and search for healthy meal ideas using integrated APIs.
-- **Progress Visualizations**: Interactive charts to monitor weight trends and activity consistency over time.
-- **Smart Reminders**: Set and manage health reminders (Hydration, Exercise, Meals) with automatic status updates.
-- **Admin Dashboard**: System-wide statistics and user activity monitoring for administrators.
-- **User Profiles**: Customizable user profiles with personal health metrics.
+## Core Features
 
-## Technologies Used
+- **Activity Tracking**: Comprehensive logging of workouts with metrics for duration, distance, and calorie expenditure.
+- **Nutrition Analytics**: Daily calorie tracking and meal discovery via external API integration.
+- **Progress Visualization**: Dynamic data visualization using Chart.js to monitor health trends.
+- **Task Management**: Automated reminders for hydration, exercise, and nutrition.
+- **Admin Suite**: High-level system monitoring and user management dashboard.
 
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Frontend**: EJS (Embedded JavaScript), Vanilla CSS, Bootstrap 5
-- **Authentication**: Passport.js with Local Strategy, Bcrypt for password hashing
-- **Visualization**: Chart.js
-- **File Uploads**: Multer (configured for local storage)
+## Technical Stack
 
-## Project Structure
+- **Runtime**: Node.js (Express.js)
+- **Persistence**: MongoDB (Mongoose ODM)
+- **Templating**: EJS (Embedded JavaScript)
+- **Frontend**: Vanilla CSS, Bootstrap 5, Chart.js
+- **Security**: Passport.js, Bcrypt (Salting/Hashing), Express-Session
+- **Infrastructure**: Docker, Google Cloud Run, MongoDB Atlas
 
-### Configuration
+## Project Architecture
 
-- `index.js`: Main entry point and server setup.
-- `package.json`: Project metadata and dependencies.
-- `package-lock.json`: Dependency version locking.
-- `.env.example`: Template for environment variables.
-
-### Folders
-
-- `routes/`: Modular route handlers for pages, users, and activities.
-- `models/`: Mongoose schemas for data storage.
-- `views/`: EJS templates for the UI.
-- `public/`: Static assets (CSS, JS, images).
+```text
+├── app.js               # Application entry point & middleware
+├── index.js             # Server initialization
+├── Dockerfile           # Container configuration
+├── models/              # Mongoose data schemas
+├── routes/              # Modular API & Page routing
+├── middleware/          # Authentication & RBAC logic
+├── views/               # Server-side rendered templates
+├── public/              # Client-side assets (JS, CSS, Images)
+└── tests/               # Unit and Integration test suites
+```
 
 ## Deployment (Google Cloud Run)
 
-The application is containerized and deployed to **Google Cloud Run**.
+The application is containerized and deployed via **Google Cloud Build** to ensure consistent architecture compliance.
 
-### 1. Build and Push to Artifact Registry
-Use Google Cloud Build to ensure the image is built for the correct architecture (`amd64`):
+### CI/CD Workflow
+1. **Containerization**: 
+   ```bash
+   gcloud builds submit --tag asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app
+   ```
+2. **Orchestration**:
+   ```bash
+   gcloud run deploy fithub-service \
+     --image asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app \
+     --region asia-southeast1 \
+     --allow-unauthenticated \
+     --set-env-vars MONGODB_URI='[CONNECTION_STRING]',SESSION_SECRET='[SECRET]'
+   ```
 
+## Local Development
+
+### Prerequisites
+- Node.js (v20+)
+- MongoDB (Local or Atlas)
+
+### Installation
 ```bash
-gcloud builds submit --tag asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app
+npm install
+npm run server
 ```
 
-### 2. Deploy to Cloud Run
-Deploy the container and set the necessary environment variables:
-
-```bash
-gcloud run deploy fithub-service \
-  --image asia-southeast1-docker.pkg.dev/[PROJECT_ID]/[REPO]/fithub-app \
-  --region asia-southeast1 \
-  --allow-unauthenticated \
-  --set-env-vars MONGODB_URI='your_mongodb_connection_string',PORT=8080
+### Environment Configuration
+Create a `.env` file in the root directory:
+```env
+MONGODB_URI=mongodb://localhost:27017/fitHub
+SESSION_SECRET=fithub_dev_secret
+PORT=3000
 ```
-
-## Setup (Local Development)
-
-1. **Install dependencies**:
-
-   ```bash
-   npm install
-   ```
-
-2. **Environment variables**:
-   Create a `.env` file using `.env.example` as a guide:
-
-   ```env
-   MONGODB_URI=mongodb://localhost:27017/fitHub
-   SESSION_SECRET=your_secret
-   PORT=3000
-   ```
-
-3. **Run the application**:
-
-   ```bash
-   npm run server
-   ```
 
 ## Demo Credentials
 
-For portfolio review purposes, you can use the following pre-configured accounts to explore the application:
+For demonstration and review:
 
-### 1. Standard User (Demo)
+### 1. Standard User
 - **Email:** `guest@fithub.app`
 - **Password:** `guestpassword123`
-- **Access:** Full access to activity tracking, nutrition planning, and reminders.
 
 ### 2. Administrator
 - **Email:** `admin@fithub.app`
 - **Password:** `adminpassword123`
-- **Access:** Includes access to the **Admin Dashboard** (available in the navbar) to view system-wide stats and user management.
 
-## Security & Architecture
+## Security Implementation
 
-This project demonstrates several professional security practices:
-- **RBAC (Role-Based Access Control):** Server-side middleware enforces strict access limits based on user roles (User vs. Admin).
-- **Password Hashing:** Uses `bcrypt` with a salt factor of 12 for secure credential storage.
-- **Session Security:** Cryptographically signed session cookies with unique secrets.
-- **API Protection:** All data-driven endpoints are protected by authorization guards to prevent unauthorized access.
-- **Separation of Concerns:** Clean architectural split between Routes, Models, and Middleware.
+- **Identity Management**: Role-Based Access Control (RBAC) managed via custom middleware.
+- **Credential Protection**: Industry-standard Bcrypt hashing with a cost factor of 12.
+- **Session Integrity**: Cryptographically signed session cookies.
+- **Data Protection**: Sanitized inputs and protected API endpoints to prevent unauthorized access.
