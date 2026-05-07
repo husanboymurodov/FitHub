@@ -19,7 +19,7 @@ FitHub is a comprehensive health and fitness management platform. It allows user
 - **Templating**: EJS (Embedded JavaScript)
 - **Frontend**: Vanilla CSS, Bootstrap 5, Chart.js
 - **Security**: Passport.js, Bcrypt (Salting/Hashing), Express-Session
-- **Infrastructure**: Docker, Google Cloud Run, MongoDB Atlas
+- **Infrastructure**: Docker, Google Cloud Run (512Mi RAM, 1 vCPU), MongoDB Atlas
 
 ## Project Architecture
 
@@ -27,6 +27,7 @@ FitHub is a comprehensive health and fitness management platform. It allows user
 ├── app.js               # Application entry point & middleware
 ├── index.js             # Server initialization
 ├── Dockerfile           # Container configuration
+├── cloudbuild.yaml      # GCP CI/CD pipeline definition
 ├── models/              # Mongoose data schemas
 ├── routes/              # Modular API & Page routing
 ├── middleware/          # Authentication & RBAC logic
@@ -37,26 +38,27 @@ FitHub is a comprehensive health and fitness management platform. It allows user
 
 ## Deployment (Google Cloud Run)
 
-The application is containerized and deployed via **Google Cloud Build** to ensure consistent architecture compliance.
-**CI/CD is configured such that pushes to the main branch automatically trigger a new build and deployment.**
+The application is containerized and deployed via **Google Cloud Build (2nd Gen)** to ensure consistent architecture compliance and automated delivery.
+
+### Infrastructure Details
+- **Service Name**: `fithub-app`
+- **Region**: `asia-southeast1` (Singapore)
+- **Auto-scaling**: 0 to 3 instances (Cost-optimized)
+- **Registry**: Google Artifact Registry (`cloud-run-source-deploy`)
 
 ### CI/CD Workflow
-1. **Source Control Integration**: Changes are pushed to the GitHub repository.
-2. **Automated Build**: Google Cloud Build detects new commits and builds the Docker image.
-   ```bash
-   # Automatically triggered by Cloud Build using cloudbuild.yaml
-   # Image: asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:$COMMIT_SHA
-   ```
-3. **Automated Deployment**: The newly built image is deployed to Google Cloud Run.
-   ```bash
-   # Automatically triggered by Cloud Build using cloudbuild.yaml
-   # Note: MONGODB_URI and SESSION_SECRET are passed as Cloud Build substitutions.
-   gcloud run deploy fithub-service \
-     --image asia-southeast1-docker.pkg.dev/husanboymurodov/fithub-repo/fithub-app:$COMMIT_SHA \
-     --region asia-southeast1 \
-     --allow-unauthenticated \
-     --set-env-vars MONGODB_URI='${_MONGODB_URI}',SESSION_SECRET='${_SESSION_SECRET}'
-   ```
+1. **Source Integration**: Changes are pushed to the GitHub repository.
+2. **Automated Build**: Cloud Build detects commits to the `main` branch and builds the Docker image.
+3. **Automated Deployment**: The image is pushed to Artifact Registry and automatically deployed to Cloud Run.
+
+```bash
+# Example deployment command (Automated via Cloud Build)
+gcloud run deploy fithub-app \
+  --image asia-southeast1-docker.pkg.dev/husanboymurodov/cloud-run-source-deploy/fithub-app:$COMMIT_SHA \
+  --region asia-southeast1 \
+  --allow-unauthenticated \
+  --set-env-vars MONGODB_URI='[MONGODB_ATLAS_URI]',SESSION_SECRET='[SESSION_SECRET]'
+```
 
 ## Local Development
 
@@ -94,5 +96,6 @@ For demonstration and review:
 
 - **Identity Management**: Role-Based Access Control (RBAC) managed via custom middleware.
 - **Credential Protection**: Industry-standard Bcrypt hashing with a cost factor of 12.
+- **Secrets Management**: Integration with **GCP Secret Manager** for OAuth tokens and secure environment variable injection.
 - **Session Integrity**: Cryptographically signed session cookies.
 - **Data Protection**: Sanitized inputs and protected API endpoints to prevent unauthorized access.
