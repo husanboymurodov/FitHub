@@ -2,8 +2,11 @@ const request = require('supertest');
 const app = require('../app');
 const mongoose = require('mongoose');
 const User = require('../models/user');
+const { connectDatabase } = require('../config/database');
 
-describe('Admin Role-Based Access Control', () => {
+const describeWithDb = process.env.RUN_DB_TESTS === 'true' ? describe : describe.skip;
+
+describeWithDb('Admin Role-Based Access Control', () => {
     let adminAgent;
     let guestAgent;
 
@@ -11,12 +14,7 @@ describe('Admin Role-Based Access Control', () => {
         adminAgent = request.agent(app);
         guestAgent = request.agent(app);
 
-        // Wait for mongoose connection to be ready
-        if (mongoose.connection.readyState !== 1) {
-            await new Promise((resolve) => {
-                mongoose.connection.once('open', resolve);
-            });
-        }
+        await connectDatabase();
         // Small delay to ensure seed is finished
         await new Promise(resolve => setTimeout(resolve, 500));
 

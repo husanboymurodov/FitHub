@@ -28,7 +28,7 @@ steps:
   - 'managed'
   - '--allow-unauthenticated'
   - '--set-env-vars'
-  - 'MONGODB_URI=${_MONGODB_URI},SESSION_SECRET=${_SESSION_SECRET}' # These are defined as substitutions below
+  - 'MONGODB_URI=${_MONGODB_URI},SESSION_SECRET=${_SESSION_SECRET},NODE_ENV=production,SEED_DEMO_ACCOUNTS=${_SEED_DEMO_ACCOUNTS}' # These are defined as substitutions below
 
 # This section lists the images produced by the build, primarily for Artifact Registry tracking.
 images:
@@ -48,3 +48,4 @@ options:
 substitutions:
   _MONGODB_URI: 'YOUR_MONGODB_ATLAS_CONNECTION_STRING' # Placeholder for your MongoDB URI
   _SESSION_SECRET: 'YOUR_SESSION_SECRET'             # Placeholder for your session secret
+  _SEED_DEMO_ACCOUNTS: 'true'

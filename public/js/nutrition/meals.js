@@ -1,6 +1,24 @@
 let favoriteMeals = [];
 let mealData = []; // This will store the fetched meal data
 
+function escapeHtml(value) {
+    return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function safeImageUrl(value) {
+    try {
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+        return '';
+    }
+}
+
 // Fetch meal data from TheMealDB API
 async function fetchMeals() {
     const apiUrl = `https://www.themealdb.com/api/json/v1/1/search.php?s=`;
@@ -45,18 +63,21 @@ function renderMeals() {
     const mealList = document.getElementById("mealList");
     mealList.innerHTML = ''; // Clear previous meal cards
     mealData.forEach((meal, index) => {
+        const mealName = escapeHtml(meal.strMeal);
+        const mealCategory = escapeHtml(meal.strCategory);
+        const mealImage = safeImageUrl(meal.strMealThumb);
         const card = `
         <div class="col-md-4 meal-card mb-4">
             <div class="card" onclick="showMealDetails(${index})" style="cursor:pointer">
-            <img src="${meal.strMealThumb}" class="card-img-top" alt="${meal.strMeal}">
+            <img src="${mealImage}" class="card-img-top" alt="${mealName}">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
-                <h5 class="meal-name card-title mb-0">${meal.strMeal}</h5>
+                <h5 class="meal-name card-title mb-0">${mealName}</h5>
                 <button class="btn btn-light text-danger border-0" title="Add to Favorites" onclick="addFavorite(${index}); event.stopPropagation();">
                     <i class="bi bi-heart-fill fs-5"></i>
                 </button>
                 </div>
-                <p class="card-text mb-1">${meal.strCategory}</p>
+                <p class="card-text mb-1">${mealCategory}</p>
                 <div class="d-flex justify-content-between align-items-center">
                 <p class="text-primary mb-0"><strong>Calories: ${calorieMap[meal.strMeal] || 'N/A'} kcal</strong></p>
                 <button class="btn btn-light text-light bg-success border-0 ms-2" title="Add to Daily Intake" onclick="addMealToIntake(${index}); event.stopPropagation();">
@@ -87,13 +108,13 @@ function showMealDetails(index) {
     }
 
     const modalBody = `
-        <h5>${meal.strMeal}</h5>
-        <img src="${meal.strMealThumb}" class="img-fluid mb-3 " alt="${meal.strMeal}" style="max-height: 300px;">
-        <p><strong>Category:</strong> ${meal.strCategory}</p>
-        <p><strong>Area:</strong> ${meal.strArea}</p>
+        <h5>${escapeHtml(meal.strMeal)}</h5>
+        <img src="${safeImageUrl(meal.strMealThumb)}" class="img-fluid mb-3 " alt="${escapeHtml(meal.strMeal)}" style="max-height: 300px;">
+        <p><strong>Category:</strong> ${escapeHtml(meal.strCategory)}</p>
+        <p><strong>Area:</strong> ${escapeHtml(meal.strArea)}</p>
         <h6>Ingredients:</h6>
         <ul>
-            ${ingredients.map(item => `<li>${item}</li>`).join('')}
+            ${ingredients.map(item => `<li>${escapeHtml(item)}</li>`).join('')}
         </ul>
     `;
 
@@ -155,14 +176,18 @@ function renderFavoriteMeals() {
     }
 
     favoriteMeals.forEach((meal) => {
+        const mealName = escapeHtml(meal.name);
+        const mealCategory = escapeHtml(meal.category);
+        const mealImage = safeImageUrl(meal.image);
+        const mealId = encodeURIComponent(String(meal.mealId || ''));
         const favCard = `
         <div class="col-md-4">
           <div class="card mb-4">
-            <img src="${meal.image}" class="card-img-top" alt="${meal.name}">
+            <img src="${mealImage}" class="card-img-top" alt="${mealName}">
             <div class="card-body">
-              <h5 class="card-title">${meal.name}</h5>
-              <p class="card-text">${meal.category}</p>
-              <button class="btn btn-danger" onclick="removeFavorite('${meal.mealId}')">Remove from Favorites</button>
+              <h5 class="card-title">${mealName}</h5>
+              <p class="card-text">${mealCategory}</p>
+              <button class="btn btn-danger" onclick="removeFavorite(decodeURIComponent('${mealId}'))">Remove from Favorites</button>
             </div>
           </div>
         </div>
@@ -265,7 +290,7 @@ function renderIntakeList(intake) {
 
 
 // Initialize favorites on page load
-window.onload = async function () {
+window.addEventListener('load', async function () {
     try {
         await fetchMeals();
         const favResponse = await fetch('/api/favorites');
@@ -278,4 +303,4 @@ window.onload = async function () {
     } catch (error) {
         console.error('Error initializing nutrition page:', error);
     }
-}
+});

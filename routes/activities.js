@@ -84,7 +84,15 @@ router.post('/', requireLogin, async (req, res) => {
 
 router.delete('/:id', requireLogin, async (req, res) => {
     try {
-        await Activity.findByIdAndDelete(req.params.id);
+        const deletedActivity = await Activity.findOneAndDelete({
+            _id: req.params.id,
+            user: req.session.user_id
+        });
+
+        if (!deletedActivity) {
+            return res.status(404).send('Activity not found');
+        }
+
         res.redirect('/tracker');
     } catch (err) {
         console.error('Error deleting activity:', err);
