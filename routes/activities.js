@@ -77,6 +77,12 @@ router.post('/', requireLogin, async (req, res) => {
         await newActivity.save();
         res.redirect('/tracker');
     } catch (error) {
+        if (error.name === 'ValidationError') {
+            console.error("Validation Error:", error.message);
+            // In a full production app, you might pass the error to the view.
+            // For now, we return a 400 with the specific validation message.
+            return res.status(400).send(`Invalid input: ${error.message}`);
+        }
         console.error("Error saving activity:", error);
         res.status(500).send("Internal Server Error");
     }

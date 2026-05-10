@@ -12,11 +12,12 @@ const dailyIntakeSchema = new mongoose.Schema({
     },
     items: [{
         name: String,
-        calories: Number
+        calories: { type: Number, min: 0 }
     }],
     totalCalories: {
         type: Number,
-        default: 0
+        default: 0,
+        min: 0
     }
 }, { timestamps: true });
 
